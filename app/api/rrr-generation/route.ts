@@ -5,6 +5,7 @@ interface RRRGenerationResponse {
   success: boolean;
   message?: string;
   error?: string;
+  errorCode?: string;
   rrr?: string;
   transactionId?: string;
 }
@@ -35,10 +36,13 @@ export async function POST(request: NextRequest) {
         email,
         amount,
       });
+
       return NextResponse.json(
         {
           success: false,
-          error: 'Missing required details for RRR generation',
+          error:
+            'Please provide all required information to generate your payment reference.',
+          errorCode: 'MISSING_FIELDS',
         } as RRRGenerationResponse,
         { status: 400 }
       );
@@ -65,10 +69,32 @@ export async function POST(request: NextRequest) {
     console.log('generateRRR result:', result);
 
     if (!result.success) {
+      // Parse the error to provide a more user-friendly message
+      let userFriendlyError = 'Unable to generate your payment reference.';
+      let errorCode = 'GENERATION_FAILED';
+
+      // If there's an error message from Remita API
+      if (result.error && result.error.includes('Unauthorized')) {
+        userFriendlyError =
+          'The payment system is currently unavailable. Please try again later or contact support.';
+        errorCode = 'AUTH_ERROR';
+      } else if (result.error && result.error.includes('timeout')) {
+        userFriendlyError =
+          'The payment service is taking too long to respond. Please try again later.';
+        errorCode = 'TIMEOUT';
+      }
+
+      // Log the detailed error for debugging
+      console.error('Detailed error from Remita:', result.error);
+
       return NextResponse.json(
         {
           success: false,
-          error: result.error || 'Failed to generate RRR',
+          error: userFriendlyError,
+          errorCode: errorCode,
+          // Include a debug message only in development
+          debug:
+            process.env.NODE_ENV === 'development' ? result.error : undefined,
         } as RRRGenerationResponse,
         { status: 500 }
       );
@@ -78,17 +104,56 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'RRR generated successfully',
+      message: 'Payment reference generated successfully',
       rrr: result.rrr,
       transactionId: result.transactionId,
     } as RRRGenerationResponse);
   } catch (error) {
     console.error('Error in RRR generation API route:', error);
 
+    // Create a user-friendly error message
+    let userFriendlyError =
+      'We encountered an issue while processing your request. Please try again later.';
+    let errorCode = 'SERVER_ERROR';
+
+    // Extract more specific info if available
+    if (error instanceof Error) {
+      if (
+        error.message.includes('Unauthorized') ||
+        error.message.includes('401')
+      ) {
+        userFriendlyError =
+          'The payment system is currently unavailable. Please try again later or contact support.';
+        errorCode = 'AUTH_ERROR';
+      } else if (
+        error.message.includes('timeout') ||
+        error.message.includes('ECONNABORTED')
+      ) {
+        userFriendlyError =
+          'The payment service is taking too long to respond. Please try again later.';
+        errorCode = 'TIMEOUT';
+      } else if (
+        error.message.includes('network') ||
+        error.message.includes('ENOTFOUND')
+      ) {
+        userFriendlyError =
+          'There seems to be a network issue. Please check your connection and try again.';
+        errorCode = 'NETWORK_ERROR';
+      }
+    }
+
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'Internal server error',
+        error: userFriendlyError,
+        errorCode: errorCode,
+        // Include detailed error only in development
+        debug:
+          process.env.NODE_ENV === 'development'
+            ? error instanceof Error
+              ? error.message
+              : String(error)
+            : undefined,
       } as RRRGenerationResponse,
       { status: 500 }
     );
