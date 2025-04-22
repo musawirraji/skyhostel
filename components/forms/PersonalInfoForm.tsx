@@ -1,7 +1,10 @@
+'use client';
+
+import { useState } from 'react';
 import { format } from 'date-fns';
-import { CalendarIcon } from 'lucide-react';
-import { Control } from 'react-hook-form';
-import * as z from 'zod';
+import { CalendarIcon, ChevronLeft } from 'lucide-react';
+import type { Control } from 'react-hook-form';
+import type * as z from 'zod';
 
 import { Input } from '@/components/ui/input';
 import {
@@ -26,13 +29,40 @@ import {
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
-import { formSchema } from '@/lib/validation';
+import type { formSchema } from '@/lib/validation';
 
 interface PersonalInfoFormProps {
   control: Control<z.infer<typeof formSchema>>;
 }
 
+type DatePickerView = 'year' | 'month' | 'day';
+
 const PersonalInfoForm = ({ control }: PersonalInfoFormProps) => {
+  const [view, setView] = useState<DatePickerView>('year');
+  const [tempDate, setTempDate] = useState<Date | null>(null);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+
+  const currentYear = new Date().getFullYear();
+  const years = Array.from(
+    { length: currentYear - 1900 + 1 },
+    (_, i) => currentYear - i
+  );
+
+  const months = [
+    { value: 0, label: 'January' },
+    { value: 1, label: 'February' },
+    { value: 2, label: 'March' },
+    { value: 3, label: 'April' },
+    { value: 4, label: 'May' },
+    { value: 5, label: 'June' },
+    { value: 6, label: 'July' },
+    { value: 7, label: 'August' },
+    { value: 8, label: 'September' },
+    { value: 9, label: 'October' },
+    { value: 10, label: 'November' },
+    { value: 11, label: 'December' },
+  ];
+
   return (
     <>
       <div className='space-y-2'>
@@ -187,11 +217,20 @@ const PersonalInfoForm = ({ control }: PersonalInfoFormProps) => {
           render={({ field }) => (
             <FormItem className='flex flex-col'>
               <FormLabel>What is your date of birth?</FormLabel>
-              <Popover>
+              <Popover
+                open={isCalendarOpen}
+                onOpenChange={(open) => {
+                  setIsCalendarOpen(open);
+                  if (open) {
+                    setView('year');
+                    setTempDate(field.value || null);
+                  }
+                }}
+              >
                 <PopoverTrigger asChild>
                   <FormControl>
                     <Button
-                      variant={'outline'}
+                      variant='outline'
                       className={cn(
                         'w-full pl-3 text-left font-normal',
                         !field.value && 'text-muted-foreground'
@@ -207,15 +246,117 @@ const PersonalInfoForm = ({ control }: PersonalInfoFormProps) => {
                   </FormControl>
                 </PopoverTrigger>
                 <PopoverContent className='w-auto p-0' align='start'>
-                  <Calendar
-                    mode='single'
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    disabled={(date) =>
-                      date > new Date() || date < new Date('1900-01-01')
-                    }
-                    initialFocus
-                  />
+                  {view === 'year' && (
+                    <div className='p-2 w-[280px]'>
+                      <div className='flex items-center justify-between mb-4 px-2 pt-2'>
+                        <h3 className='font-medium'>Select Year</h3>
+                      </div>
+                      <div className='grid grid-cols-4 gap-2 max-h-[280px] overflow-y-auto p-2'>
+                        {years.map((year) => (
+                          <Button
+                            key={year}
+                            variant='outline'
+                            size='sm'
+                            className={cn(
+                              'h-8',
+                              tempDate &&
+                                tempDate.getFullYear() === year &&
+                                'bg-primary text-primary-foreground'
+                            )}
+                            onClick={() => {
+                              const newDate = tempDate || new Date();
+                              newDate.setFullYear(year);
+                              setTempDate(newDate);
+                              setView('month');
+                            }}
+                          >
+                            {year}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {view === 'month' && (
+                    <div className='p-2 w-[280px]'>
+                      <div className='flex items-center justify-between mb-4 px-2 pt-2'>
+                        <Button
+                          variant='ghost'
+                          size='sm'
+                          className='h-8 w-8 p-0'
+                          onClick={() => setView('year')}
+                        >
+                          <ChevronLeft className='h-4 w-4' />
+                        </Button>
+                        <h3 className='font-medium'>
+                          {tempDate
+                            ? tempDate.getFullYear()
+                            : new Date().getFullYear()}
+                        </h3>
+                      </div>
+                      <div className='grid grid-cols-3 gap-2 p-2'>
+                        {months.map((month) => (
+                          <Button
+                            key={month.value}
+                            variant='outline'
+                            size='sm'
+                            className={cn(
+                              'h-8',
+                              tempDate &&
+                                tempDate.getMonth() === month.value &&
+                                'bg-primary text-primary-foreground'
+                            )}
+                            onClick={() => {
+                              const newDate = tempDate || new Date();
+                              newDate.setMonth(month.value);
+                              setTempDate(newDate);
+                              setView('day');
+                            }}
+                          >
+                            {month.label.substring(0, 3)}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {view === 'day' && tempDate && (
+                    <div className='p-2 w-[280px]'>
+                      <div className='flex items-center justify-between mb-4 px-2 pt-2'>
+                        <Button
+                          variant='ghost'
+                          size='sm'
+                          className='h-8 w-8 p-0'
+                          onClick={() => setView('month')}
+                        >
+                          <ChevronLeft className='h-4 w-4' />
+                        </Button>
+                        <h3 className='font-medium'>
+                          {months[tempDate.getMonth()].label}{' '}
+                          {tempDate.getFullYear()}
+                        </h3>
+                      </div>
+                      <Calendar
+                        mode='single'
+                        selected={tempDate}
+                        month={tempDate}
+                        onSelect={(date) => {
+                          if (date) {
+                            field.onChange(date);
+                            // Close the popover after day selection
+                            setIsCalendarOpen(false);
+                          }
+                        }}
+                        disabled={(date) =>
+                          date > new Date() ||
+                          date < new Date('1900-01-01') ||
+                          date.getMonth() !== tempDate.getMonth() ||
+                          date.getFullYear() !== tempDate.getFullYear()
+                        }
+                        initialFocus
+                      />
+                    </div>
+                  )}
                 </PopoverContent>
               </Popover>
               <FormMessage />

@@ -62,7 +62,6 @@ const RegisterForm = () => {
           description: 'Proceeding to payment...',
         });
 
-        // Move to the payment step
         setStep(3);
       } else {
         console.error('Registration failed:', result.error);
@@ -82,7 +81,6 @@ const RegisterForm = () => {
   };
 
   const nextStep = () => {
-    // Create a more specific type for the fields to validate
     type FormField = keyof z.infer<typeof formSchema>;
 
     const fieldsToValidate: FormField[] =
