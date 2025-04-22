@@ -6,10 +6,10 @@ import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { RemitaPaymentResponse, RemitaPaymentError } from '@/types/remita';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { RemitaDemoButton } from '../RemitaDemoButton';
 import PaymentReceipt from '../PaymentReceipt';
 import PaymentSelectionModal from '../PaymentSelectionModal';
+import RRRGeneratedComponent from '../RRRGenerated';
+import PayNow from '../PayNow';
 
 interface PaymentProcessingProps {
   formValues: z.infer<typeof formSchema>;
@@ -138,7 +138,6 @@ const PaymentProcessing: React.FC<PaymentProcessingProps> = ({
     }
   };
 
-  // Set up recurring payment status check
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
 
@@ -227,79 +226,16 @@ const PaymentProcessing: React.FC<PaymentProcessingProps> = ({
   // Render RRR generated screen
   if (rrrGenerated) {
     return (
-      <div className='space-y-6'>
-        <div className='text-center'>
-          <h3 className='text-xl font-bold text-blue-600'>
-            RRR Generated Successfully
-          </h3>
-          <p className='text-gray-600 mt-2'>
-            Use this RRR to complete your payment on Remita&apos;s website.
-          </p>
-        </div>
-
-        <div className='bg-blue-50 p-4 rounded-md'>
-          <h4 className='font-medium text-blue-800'>Payment Details</h4>
-          <div className='mt-2 space-y-2'>
-            <div className='flex justify-between'>
-              <span className='text-blue-700'>Amount:</span>
-              <span className='font-medium'>
-                ₦{paymentAmount.toLocaleString()}
-              </span>
-            </div>
-            <div className='flex justify-between'>
-              <span className='text-blue-700'>RRR:</span>
-              <span className='font-medium font-mono text-lg'>
-                {rrrGenerated}
-              </span>
-            </div>
-            <div className='flex justify-between'>
-              <span className='text-blue-700'>Status:</span>
-              <span className='font-medium text-yellow-600'>Pending</span>
-            </div>
-          </div>
-        </div>
-
-        <div className='bg-gray-50 p-4 rounded-md'>
-          <h4 className='font-medium text-gray-800'>How to Pay with RRR</h4>
-          <ol className='mt-2 space-y-2 text-sm pl-5 list-decimal'>
-            <li>
-              Visit the Remita website at{' '}
-              <a
-                href='https://www.remita.net'
-                target='_blank'
-                rel='noopener noreferrer'
-                className='text-blue-600 hover:underline'
-              >
-                www.remita.net
-              </a>
-            </li>
-            <li>
-              Click on &quot;Pay RRR&quot; or &quot;Pay a Federal Government
-              Agency&quot;
-            </li>
-            <li>Enter the RRR number above</li>
-            <li>Complete the payment process</li>
-          </ol>
-        </div>
-
-        <div className='flex justify-center space-x-4'>
-          <Button
-            variant='outline'
-            onClick={() => {
-              setRrrGenerated(null);
-              setPayNowSelected(true);
-            }}
-          >
-            Pay Now Instead
-          </Button>
-          <Button
-            className='bg-green-600 hover:bg-green-700'
-            onClick={handleDashboardClick}
-          >
-            Go to Dashboard
-          </Button>
-        </div>
-      </div>
+      <RRRGeneratedComponent
+        rrrNumber={rrrGenerated}
+        paymentAmount={paymentAmount}
+        formValues={formValues}
+        onPayNowClick={() => {
+          setRrrGenerated(null);
+          setPayNowSelected(true);
+        }}
+        onDashboardClick={handleDashboardClick}
+      />
     );
   }
 
@@ -343,7 +279,6 @@ const PaymentProcessing: React.FC<PaymentProcessingProps> = ({
     );
   }
 
-  // Show payment modal if needed
   if (showPaymentModal) {
     return (
       <PaymentSelectionModal
@@ -356,77 +291,19 @@ const PaymentProcessing: React.FC<PaymentProcessingProps> = ({
     );
   }
 
-  // Render payment component if pay now selected
   if (payNowSelected) {
     return (
-      <div className='space-y-6'>
-        <Card className='w-full bg-white shadow-lg rounded-lg overflow-hidden'>
-          <CardHeader className='space-y-1 text-center p-6 bg-white border-b'>
-            <h2 className='text-2xl font-bold'>Complete Your Payment</h2>
-            <p className='text-sm text-gray-600'>
-              Please complete your payment to finalize your registration
-            </p>
-          </CardHeader>
-          <CardContent className='p-6 space-y-6'>
-            <div className='bg-blue-50 p-4 rounded-md'>
-              <h4 className='font-medium text-blue-800'>Payment Details</h4>
-              <div className='mt-2 space-y-2'>
-                <div className='flex justify-between'>
-                  <span className='text-blue-700'>Amount:</span>
-                  <span className='font-medium'>
-                    ₦{paymentAmount.toLocaleString()}
-                  </span>
-                </div>
-                <div className='flex justify-between'>
-                  <span className='text-blue-700'>Registration Number:</span>
-                  <span className='font-medium'>{formValues.matricNumber}</span>
-                </div>
-                <div className='flex justify-between'>
-                  <span className='text-blue-700'>Payment Type:</span>
-                  <span className='font-medium'>
-                    {formValues.paymentType === 'FULL'
-                      ? 'Full Payment'
-                      : formValues.paymentType === 'HALF'
-                      ? 'Half Payment'
-                      : 'Custom Payment'}
-                  </span>
-                </div>
-              </div>
-              <p className='text-sm text-blue-700 mt-4'>
-                You will be redirected to Remita to complete your payment
-                securely. An RRR (Remita Retrieval Reference) will be generated
-                for you.
-              </p>
-            </div>
-
-            <div className='flex justify-center pt-4'>
-              <RemitaDemoButton
-                amount={paymentAmount}
-                firstName={formValues.firstName}
-                lastName={formValues.lastName}
-                email={formValues.email}
-                matricNumber={formValues.matricNumber}
-                onSuccess={handlePaymentSuccess}
-                onError={handlePaymentError}
-                onClose={handlePaymentClose}
-              />
-            </div>
-
-            <div className='text-center mt-4'>
-              <Button
-                variant='outline'
-                onClick={() => setShowPaymentModal(true)}
-              >
-                Back to Payment Options
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <PayNow
+        formValues={formValues}
+        paymentAmount={paymentAmount}
+        onSuccess={handlePaymentSuccess}
+        onError={handlePaymentError}
+        onClose={handlePaymentClose}
+        onBackToOptions={() => setShowPaymentModal(true)}
+      />
     );
   }
 
-  // Loading state
   if (isLoading) {
     return (
       <div className='flex flex-col items-center justify-center p-8 space-y-4'>
@@ -436,7 +313,6 @@ const PaymentProcessing: React.FC<PaymentProcessingProps> = ({
     );
   }
 
-  // Default fallback view
   return (
     <div className='flex justify-center items-center p-8'>
       <Button

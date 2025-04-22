@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -24,6 +25,21 @@ const PaymentSelectionModal: React.FC<PaymentSelectionModalProps> = ({
   onPayLater,
   amount,
 }) => {
+  const [isPayNowLoading, setIsPayNowLoading] = useState(false);
+  const [isPayLaterLoading, setIsPayLaterLoading] = useState(false);
+
+  const handlePayNow = () => {
+    setIsPayNowLoading(true);
+
+    onPayNow();
+  };
+
+  const handlePayLater = () => {
+    setIsPayLaterLoading(true);
+
+    onPayLater();
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className='sm:max-w-md'>
@@ -54,11 +70,33 @@ const PaymentSelectionModal: React.FC<PaymentSelectionModalProps> = ({
         </div>
 
         <DialogFooter className='flex-col sm:flex-row sm:justify-between gap-2'>
-          <Button variant='outline' onClick={onPayLater}>
-            Generate RRR Only
+          <Button
+            variant='outline'
+            onClick={handlePayLater}
+            disabled={isPayLaterLoading || isPayNowLoading}
+          >
+            {isPayLaterLoading ? (
+              <>
+                <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                Generating RRR...
+              </>
+            ) : (
+              'Generate RRR Only'
+            )}
           </Button>
-          <Button onClick={onPayNow} className='bg-blue-600 hover:bg-blue-700'>
-            Pay Now
+          <Button
+            onClick={handlePayNow}
+            className='bg-blue-600 hover:bg-blue-700'
+            disabled={isPayNowLoading || isPayLaterLoading}
+          >
+            {isPayNowLoading ? (
+              <>
+                <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                Processing...
+              </>
+            ) : (
+              'Pay Now'
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>
