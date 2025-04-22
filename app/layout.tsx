@@ -25,7 +25,7 @@ export default function RootLayout({
       <head>
         <Script
           src='https://remitademo.net/payment/v1/remita-pay-inline.bundle.js'
-          strategy='beforeInteractive'
+          strategy='afterInteractive'
         />
       </head>
       <body
