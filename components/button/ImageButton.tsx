@@ -11,7 +11,6 @@ interface ImageButtonProps {
 }
 
 const ImageButton: React.FC<ImageButtonProps> = ({ receiptRef, RRR }) => {
-  // Utility to wait for rendering
   const waitForRender = (): Promise<void> =>
     new Promise((resolve) => setTimeout(resolve, 100));
 
