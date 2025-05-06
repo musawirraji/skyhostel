@@ -260,68 +260,6 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
     }
   };
 
-  // Add a direct submit function that bypasses validation
-  const manualSubmit = async () => {
-    console.log('Manual submit function called');
-    setIsSubmitting(true);
-    setError(null);
-
-    try {
-      // Get current form values
-      const data = watch();
-      console.log('Current form data:', data);
-
-      // Create full name for database compatibility
-      const fullName = `${data.personalInfo.firstName} ${data.personalInfo.lastName}`;
-
-      // Create submission data (simplified version)
-      const submissionData = {
-        ...data,
-        personalInfo: {
-          ...data.personalInfo,
-          fullName,
-          passportPhoto: undefined, // Remove file object
-          passportUrl: 'https://example.com/placeholder.jpg', // Use placeholder
-        },
-        roomSelection: {
-          roomType: selectedRoom,
-          block: selectedBlock,
-          numberOfStudents: 2,
-        },
-      };
-
-      console.log('Manually submitting data:', submissionData);
-
-      // Directly call API
-      const response = await fetch('/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(submissionData),
-      });
-
-      console.log('Manual API response status:', response.status);
-      const result = await response.json();
-      console.log('Manual API response data:', result);
-
-      if (!response.ok) {
-        throw new Error(result.message || 'Error submitting form');
-      }
-
-      toast.success('Form manually submitted successfully!');
-      console.log('Setting isCompleted to true (manual)');
-      setIsCompleted(true);
-    } catch (error: any) {
-      console.error('Error in manual submit:', error);
-      setError(error.message || 'Manual submission failed');
-      toast.error(
-        error.message || 'Manual submission failed. Please try again.'
-      );
-    } finally {
-      setIsSubmitting(false);
-      console.log('Manual form submission process completed');
-    }
-  };
-
   if (isCompleted) {
     const fullName = `${formData.personalInfo.firstName} ${formData.personalInfo.lastName}`;
     return (
