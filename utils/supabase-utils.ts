@@ -74,6 +74,7 @@ export async function generateRRR(data: any) {
     return {
       success: true,
       rrr: 'RRR' + Math.floor(1000000000 + Math.random() * 9000000000),
+      transactionId: `TRANS-${Date.now()}`,
       message: 'RRR generated successfully',
     };
   } catch (error) {
@@ -95,7 +96,7 @@ export async function updateAllPendingPayments() {
     // Mock implementation - would use real Supabase in production
     return {
       success: true,
-      updatedCount: 0,
+      updated: 0,
       message: 'No pending payments to update',
     };
   } catch (error) {

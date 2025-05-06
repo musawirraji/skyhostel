@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import RegisterForm from '@/components/forms/RegisterForm';
 import { toast } from 'sonner';
 import Link from 'next/link';
 
