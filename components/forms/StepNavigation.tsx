@@ -17,7 +17,12 @@ const StepNavigation = ({
   return (
     <div className='flex justify-between pt-4'>
       {currentStep === 1 ? (
-        <Button type='button' variant='outline' className='px-8' disabled>
+        <Button
+          type='button'
+          variant='outline'
+          className='sky-btn-secondary px-8'
+          disabled
+        >
           Back
         </Button>
       ) : (
@@ -25,7 +30,7 @@ const StepNavigation = ({
           type='button'
           variant='outline'
           onClick={onPrevStep}
-          className='px-8'
+          className='sky-btn-secondary px-8'
         >
           Back
         </Button>
@@ -35,7 +40,7 @@ const StepNavigation = ({
         <Button
           type='button'
           onClick={onNextStep}
-          className='px-8 bg-blue-600 hover:bg-blue-700'
+          className='sky-btn-primary px-8'
         >
           Next
         </Button>
@@ -43,7 +48,7 @@ const StepNavigation = ({
         <Button
           type='submit'
           disabled={isSubmitting}
-          className='px-8 bg-blue-600 hover:bg-blue-700'
+          className='sky-btn-primary px-8'
         >
           {isSubmitting ? (
             <>
