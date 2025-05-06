@@ -1,4 +1,5 @@
 import { createServerSupabaseClient, supabase } from '@/lib/supabase';
+import { checkRemitaRRRStatus } from './remita-api';
 
 /**
  * Register a new student in the Supabase database
@@ -33,10 +34,19 @@ export async function registerStudent(formData: any) {
 /**
  * Update payment status in the database
  */
-export async function updatePaymentStatus(referenceId: string, status: string) {
+export async function updatePaymentStatus(
+  matricNumber: string,
+  paymentDetails: {
+    rrr: string;
+    transactionId: string;
+    amount: number;
+    status: string;
+  }
+) {
   try {
     console.log(
-      `Updating payment status for reference ${referenceId} to ${status}`
+      `Updating payment status for student ${matricNumber}:`,
+      paymentDetails
     );
 
     // Mock implementation - would use real Supabase in production
@@ -112,6 +122,106 @@ export async function checkPaymentStatus(referenceId: string) {
     };
   } catch (error) {
     console.error('Error checking payment status:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
+    };
+  }
+}
+
+/**
+ * Get payment status for a student by matric number
+ */
+export async function getStudentPaymentStatus(matricNumber: string): Promise<{
+  success: boolean;
+  paid?: boolean;
+  paymentDetails?: any;
+  error?: string;
+}> {
+  try {
+    console.log(
+      `Getting payment status for student with matric number ${matricNumber}`
+    );
+
+    // For demonstration, we'll return mock data
+    // In production, you would query the Supabase database
+
+    // Check if this is our test matric number
+    if (matricNumber === 'ABC/12345') {
+      return {
+        success: true,
+        paid: true,
+        paymentDetails: {
+          id: 'payment_123',
+          student_id: 'student_456',
+          rrr: '290019681818',
+          transaction_id: 'TRANS123456',
+          amount: 100000,
+          status: 'completed',
+          created_at: new Date().toISOString(),
+        },
+      };
+    }
+
+    // Try to fetch actual data from Supabase
+    const { data, error } = await supabase
+      .from('payments')
+      .select('*')
+      .eq('matric_number', matricNumber)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (error) {
+      console.log('No payment record found:', error.message);
+      return {
+        success: true,
+        paid: false,
+        paymentDetails: null,
+      };
+    }
+
+    return {
+      success: true,
+      paid: data.status === 'completed',
+      paymentDetails: data,
+    };
+  } catch (error) {
+    console.error('Error getting student payment status:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
+    };
+  }
+}
+
+/**
+ * Check payment status with Remita
+ */
+export async function checkRemitaPaymentStatus(rrr: string): Promise<{
+  success: boolean;
+  status?: 'pending' | 'completed' | 'failed';
+  error?: string;
+}> {
+  try {
+    console.log(`Checking Remita payment status for RRR ${rrr}`);
+
+    // Call the remita-api function to check the payment status
+    const result = await checkRemitaRRRStatus(rrr);
+
+    if (!result.success) {
+      return {
+        success: false,
+        error: result.error || 'Failed to check payment status with Remita',
+      };
+    }
+
+    return {
+      success: true,
+      status: result.status,
+    };
+  } catch (error) {
+    console.error('Error checking Remita payment status:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error occurred',

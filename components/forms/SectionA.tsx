@@ -3,12 +3,65 @@ import { Control } from 'react-hook-form';
 import FormInput from './FormInput';
 import FileUpload from './FileUpload';
 import { personalInfoSchema } from '@/lib/schemas';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Controller } from 'react-hook-form';
 
 interface SectionAProps {
   control: Control<any>;
 }
 
 const SectionA: React.FC<SectionAProps> = ({ control }) => {
+  // Nigerian states
+  const nigerianStates = [
+    'Abia',
+    'Adamawa',
+    'Akwa Ibom',
+    'Anambra',
+    'Bauchi',
+    'Bayelsa',
+    'Benue',
+    'Borno',
+    'Cross River',
+    'Delta',
+    'Ebonyi',
+    'Edo',
+    'Ekiti',
+    'Enugu',
+    'FCT',
+    'Gombe',
+    'Imo',
+    'Jigawa',
+    'Kaduna',
+    'Kano',
+    'Katsina',
+    'Kebbi',
+    'Kogi',
+    'Kwara',
+    'Lagos',
+    'Nasarawa',
+    'Niger',
+    'Ogun',
+    'Ondo',
+    'Osun',
+    'Oyo',
+    'Plateau',
+    'Rivers',
+    'Sokoto',
+    'Taraba',
+    'Yobe',
+    'Zamfara',
+  ];
+
+  // Marital status options
+  const maritalStatusOptions = ['Single', 'Married', 'Divorced', 'Widowed'];
+
   return (
     <div className='space-y-6'>
       <div className='space-y-2'>
@@ -102,23 +155,84 @@ const SectionA: React.FC<SectionAProps> = ({ control }) => {
           type='date'
           required
         />
-        <FormInput
-          control={control}
-          name='personalInfo.stateOfOrigin'
-          label='State of Origin'
-          placeholder='Enter your state of origin'
-          required
-        />
+
+        <div className='space-y-1'>
+          <Label
+            htmlFor='personalInfo.stateOfOrigin'
+            className='after:content-["*"] after:ml-0.5 after:text-red-500'
+          >
+            State of Origin
+          </Label>
+          <Controller
+            control={control}
+            name='personalInfo.stateOfOrigin'
+            render={({ field, fieldState }) => (
+              <>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger className='w-full'>
+                    <SelectValue placeholder='Select state of origin' />
+                  </SelectTrigger>
+                  <SelectContent className='bg-white'>
+                    {nigerianStates.map((state) => (
+                      <SelectItem
+                        key={state}
+                        value={state}
+                        className='hover:bg-blue-100'
+                      >
+                        {state}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {fieldState.error && (
+                  <p className='text-red-500 text-sm mt-1'>
+                    {fieldState.error.message}
+                  </p>
+                )}
+              </>
+            )}
+          />
+        </div>
       </div>
 
       <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-        <FormInput
-          control={control}
-          name='personalInfo.maritalStatus'
-          label='Marital Status'
-          placeholder='Enter your marital status'
-          required
-        />
+        <div className='space-y-1'>
+          <Label
+            htmlFor='personalInfo.maritalStatus'
+            className='after:content-["*"] after:ml-0.5 after:text-red-500'
+          >
+            Marital Status
+          </Label>
+          <Controller
+            control={control}
+            name='personalInfo.maritalStatus'
+            render={({ field, fieldState }) => (
+              <>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger className='w-full'>
+                    <SelectValue placeholder='Select marital status' />
+                  </SelectTrigger>
+                  <SelectContent className='bg-white'>
+                    {maritalStatusOptions.map((status) => (
+                      <SelectItem
+                        key={status}
+                        value={status.toLowerCase()}
+                        className='hover:bg-blue-100'
+                      >
+                        {status}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {fieldState.error && (
+                  <p className='text-red-500 text-sm mt-1'>
+                    {fieldState.error.message}
+                  </p>
+                )}
+              </>
+            )}
+          />
+        </div>
         <FormInput
           control={control}
           name='personalInfo.religion'
