@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import RegistrationForm from '@/components/forms/RegistrationForm';
@@ -8,7 +8,7 @@ import { Loader2 } from 'lucide-react';
 import { BedDouble, Building2, Users } from 'lucide-react';
 import AvailableRoomCard from '@/components/AvailableRoomCard';
 
-export default function RegisterPage() {
+function RegisterContent() {
   const searchParams = useSearchParams();
   const [isVerified, setIsVerified] = useState(false);
   const [isCheckingVerification, setIsCheckingVerification] = useState(true);
@@ -168,5 +168,22 @@ export default function RegisterPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className='container mx-auto py-20 px-4 flex flex-col items-center justify-center min-h-[60vh]'>
+          <Loader2 className='h-12 w-12 animate-spin text-blue' />
+          <p className='mt-4 text-lg text-gray-600'>
+            Loading registration page...
+          </p>
+        </div>
+      }
+    >
+      <RegisterContent />
+    </Suspense>
   );
 }
