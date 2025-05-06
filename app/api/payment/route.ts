@@ -27,12 +27,14 @@ interface PaymentStatusResponse extends ApiResponse {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { matricNumber, rrr, transactionId, amount } = body as Partial<{
-      matricNumber: string;
-      rrr: string;
-      transactionId: string;
-      amount: number | string;
-    }>;
+    const { matricNumber, rrr, transactionId, amount, status } =
+      body as Partial<{
+        matricNumber: string;
+        rrr: string;
+        transactionId: string;
+        amount: number | string;
+        status?: string;
+      }>;
 
     // Validate required fields
     if (!matricNumber || !rrr || !transactionId || !amount) {
@@ -50,6 +52,7 @@ export async function POST(request: NextRequest) {
       rrr,
       transactionId,
       amount: typeof amount === 'string' ? Number(amount) : amount,
+      status: status || 'completed',
     });
 
     if (!result.success) {
