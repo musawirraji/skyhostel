@@ -410,7 +410,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                 <ArrowRight className='h-4 w-4 ml-2' />
               </button>
             ) : (
-              <div className='flex gap-2'>
+              <div className=''>
                 <button
                   type='submit'
                   onClick={() => console.log('Submit button clicked')}
@@ -425,16 +425,6 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                   ) : (
                     'Submit Application'
                   )}
-                </button>
-
-                {/* Test button for manual submission */}
-                <button
-                  type='button'
-                  onClick={manualSubmit}
-                  className='flex items-center bg-green-600 text-white px-4 py-2 rounded'
-                  disabled={isSubmitting}
-                >
-                  Test Submit
                 </button>
               </div>
             )}
