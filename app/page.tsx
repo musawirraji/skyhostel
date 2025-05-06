@@ -56,6 +56,7 @@ const HomePage = () => {
       if (data.success && data.rrr) {
         setRrrNumber(data.rrr);
         toast.success('Payment reference generated successfully');
+        // We don't need to close the modal here because the RRR component will be shown
       } else {
         toast.error(data.error || 'Failed to generate payment reference');
       }

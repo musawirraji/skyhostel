@@ -75,3 +75,26 @@ interface PaymentVerificationResponse {
     transactionId: string;
   };
 }
+
+// Add Remita payment engine types
+interface Window {
+  RmPaymentEngine: {
+    init: (config: {
+      key: string;
+      transactionId: string;
+      customerId: string;
+      firstName: string;
+      lastName: string;
+      email: string;
+      phoneNumber?: string; // Optional
+      amount: number;
+      narration: string;
+      rrr?: string; // Optional
+      onSuccess: (response: any) => void;
+      onError: (response: any) => void;
+      onClose: () => void;
+    }) => {
+      showPaymentWidget: () => void;
+    };
+  };
+}

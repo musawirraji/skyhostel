@@ -18,7 +18,14 @@ const ImageButton = dynamic(() => import('./button/ImageButton'), {
 interface RRRGeneratedComponentProps {
   rrrNumber: string;
   paymentAmount: number;
-  formValues: z.infer<typeof formSchema>;
+  formValues: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phoneNumber: string;
+    matricNumber: string;
+    paymentType?: string;
+  };
   onPayNowClick: () => void;
   onDashboardClick: () => void;
 }
